@@ -1,0 +1,64 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('landing.jpg') center/cover;
+  }
+  
+  .content {
+    text-align: center;
+    color: white;
+    margin-top: 250px;
+  }
+  
+  h1 {
+    font-size: 100px;
+    margin-bottom: 1px; /* Adjust this value for spacing */
+  }
+  
+  h3 {
+    font-size: 30px;
+    margin-bottom: 1px;
+  }
+  
+  p {
+    font-size: 20px;
+    margin-bottom: 1px;
+  }
+  
+  .buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px; /* Increased margin from the text */
+  }
+  
+  .login-btn {
+    color: white;
+    background-color: transparent;
+    border: 3px solid white;
+    border-radius: 8px;
+    padding: 20px 50px; /* Increased padding */
+    cursor: pointer;
+    font-size: 20px;
+    width: 250px; /* Increased button width */
+    margin-right: 20px; /* Added space between buttons */
+  }
+  
+  .signup-btn {
+    background-color: #a50b5e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 20px 50px; /* Increased padding */
+    cursor: pointer;
+    font-size: 20px;
+    width: 250px; /* Increased button width */
+  }
+
+
+
+
+
+

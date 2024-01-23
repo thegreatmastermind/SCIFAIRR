@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Page</title>
+    <!-- Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Line Chart: Mood Trajectory -->
+    <canvas id="moodChart" width="600" height="300"></canvas>
+
+    <!-- Pie Chart: Percentage of Description Options -->
+    <canvas id="tagsChart" width="400" height="200"></canvas>
+
+    <!-- Bar Chart: Tags Count -->
+    <canvas id="tagsCountChart" width="400" height="200"></canvas>
+
+    <script>
+        // JavaScript code for creating charts
+        var moodData = JSON.parse('{{ mood_data | tojson | safe | replace("\'", "\\\'") }}');
+        var tagsPercentage = JSON.parse('{{ tags_percentage | tojson | safe | replace("\'", "\\\'") }}');
+        var tagsCount = JSON.parse('{{ tags_count | tojson | safe | replace("\'", "\\\'") }}');
+    
+        // Line Chart: Mood Trajectory
+        var ctxMood = document.getElementById('moodChart').getContext('2d');
+        var moodChart = new Chart(ctxMood, {
+            type: 'line',
+            data: {
+                labels: moodData.map(entry => entry.date),
+                datasets: [{
+                    label: 'Mood Trajectory',
+                    data: moodData.map(entry => entry.mood),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    
+        // Pie Chart: Percentage of Description Options
+        var ctxTags = document.getElementById('tagsChart').getContext('2d');
+        var tagsChart = new Chart(ctxTags, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(tagsPercentage),
+                datasets: [{
+                    data: Object.values(tagsPercentage),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                    ],
+                }]
+            }
+        });
+    
+        // Bar Chart: Tags Count
+        var ctxTagsCount = document.getElementById('tagsCountChart').getContext('2d');
+        var tagsCountChart = new Chart(ctxTagsCount, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(tagsCount),
+                datasets: [{
+                    label: 'Tags Count',
+                    data: Object.values(tagsCount),
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>        
+</body>
+</html>
+{% endblock %}

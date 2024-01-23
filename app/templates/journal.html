@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="journal-container">
+  <div class="journal-entry-form">
+    <div class="card">
+      <div class="card-header">
+        <h2>New Entry</h2>
+      </div>
+      <div class="card-body">    
+        <form method="POST" id="entryForm">
+          <div class="journal-date-form">
+            <div class="form-item">
+            <label for="noteDate">Date:</label>
+            <input type="date" name="noteDate" id="noteDate" required>
+            </div>
+            <div class="form-item">
+            <label for="tags">Description:</label>
+          <select  class="tags-description" name="tags" id="tags">
+            <option value="None">None</option>
+            <option value="Life Event">Life Event</option>
+            <option value="Milestone">Milestone</option>
+            <option value="Setback">Setback</option>
+            <option value="Consult">Consult</option>
+            <option value="Question">Question</option>
+            <option value="Good">Good</option>
+            <option value="Neutral">Neutral</option>
+            <option value="Entry">Entry</option>
+          </select>
+          </div>
+        </div>
+        <div class="notes">
+          <label for="note">Notes:</label>
+          <textarea name="note" id="note" class="form-control" style="height: 150px; width: 100%;"></textarea>
+        </div>
+        <div class="mood">
+          <label for="mood">Mood Check-In (1 to 10):</label>
+          <div>
+            <span class='mood-score' id="moodScore"></span>
+            <input  type="range" class="mood-range" name="mood" id="mood" min="1" max="10" step="1" oninput="updateMoodTags()">
+          </div> 
+          <div class="mood-tags">     
+          <label for="moodTags">Tags:</label>
+          <div id="moodTagsCheckboxes" class="mood-tags-container"></div>
+          </div>
+          <br>
+        </div>
+        <hr/>
+          <div class="button-container">
+            <button type="submit" class="myButton">Save Entry</button>
+          </div>
+        </form>    
+      </div>    
+    </div>
+  </div>
+
+  <div class="journal-existing-entries">
+    <h2 class="existing-entries-header">All Entries</h2>
+    <div class="entries-container">
+      {% for entry in entries %}    
+        <div class="card my-card">
+          <div class="card-header card-header-item">
+            <div class="description-date-container">
+              {{entry.tags}} - {{entry.date}}
+            </div>
+            <button type="button" class="close" onClick="deleteEntry('{{ entry.id }}')" title="Delete this entry">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="card-body">
+            {{entry.note}}
+          </div>
+          <div class="card-footer">
+            {{entry.moodTags}}
+          </div>
+        </div>    
+      {% endfor %}
+    </div>  
+</div>
+</div>
+{% endblock %}
