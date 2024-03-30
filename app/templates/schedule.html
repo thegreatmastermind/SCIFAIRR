@@ -12,25 +12,48 @@
                     <!-- Event Name -->
                     <div class="form-item">
                         <label for="event_name">Event Name:</label>
-                        <input type="text" id="event_name" name="event_name" required>
+                        <input type="text" id="event_name" name="event_name" required style="height: 40px; width: 100%;">
+                        <br>
                     </div>
+
+                    <!-- Event Icon Selector -->
+                    <div class="form-item">
+                    <label for="event_icon">Select Icon:</label>
+                    <div class="custom-dropdown" onclick="toggleDropdown()">
+                        <br>
+                        <i id="selectedIcon" class="fa fa-house"></i>
+                    <div class="dropdown-content" id="iconDropdown">
+                        <i class="fa fa-calendar" onclick="selectIcon('fa-calendar')"></i>
+                        <i class="fa fa-birthday-cake" onclick="selectIcon('fa-birthday-cake')"></i>
+                        <i class="fa fa-house" onclick="selectIcon('fa fa-house')"></i>
+                        <i class="fa-solid fa-list-check" onclick="selectIcon('fa-solid fa-list-check')"></i>
+                        <i class="fa-solid fa-fire" onclick="selectIcon('fa-solid fa-fire')"></i>
+                        <i class="fa-solid fa-bookmark" onclick="selectIcon('fa-solid fa-bookmark')"></i>
+                        <i class="fa-solid fa-folder" onclick="selectIcon('fa-solid fa-folder')"></i>
+                        <i class="fa-solid fa-utensils" onclick="selectIcon('fa-solid fa-utensils')"></i>
+                    </div>
+                </div>
+                <input type="hidden" id="selectedIconValue" name="event_icon">
+            </div>
+
 
                     <!-- Start Time -->
                     <div class="form-item">
                         <label for="start_time">Start Time:</label>
-                        <input type="datetime-local" id="start_time" name="start_time" required>
+                        <input type="datetime-local" id="start_time" name="start_time" required style="height: 40px; width: 100%;">
                     </div>
 
                     <!-- End Time -->
                     <div class="form-item">
                         <label for="end_time">End Time:</label>
-                        <input type="datetime-local" id="end_time" name="end_time" required>
+                        <input type="datetime-local" id="end_time" name="end_time" required style="height: 40px; width: 100%;">
                     </div>
 
-                    <!-- Event Notes -->
+                    <!--Event Notes-->
                     <div class="form-item">
                         <label for="event_notes">Event Notes:</label>
-                        <textarea id="event_notes" name="event_notes"></textarea>
+                        <br>
+                        <textarea id="event_notes" name="event_notes" style="height: 150px; width: 100%;"></textarea>
                     </div>
 
                     <div class="button-container">
@@ -47,21 +70,26 @@
             {% for event in events %}
             <div class="card my-card">
                 <div class="card-header card-header-item">
-                    <div class="description-date-container">
+                    <div class="description-date-container">                     
                         {{ event.event_name }} - {{ event.start_time }} to {{ event.end_time }}
                     </div>
+                    <div class="icon-container">
+                        <i class="fa {{ event.event_icon }}"></i>
+                    </div>                                       
                     <form method="POST" action="/delete-event" style="display: inline;">
-                        <input type="hidden" name="event_id" value="{{ event.id }}">
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        <input type="hidden" name="eventId" value="{{ event.id }}">
+                        <button type="button" class="close" onClick="deleteEvent('{{ event.id }}')" title="Delete this event">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </form>
                 </div>
                 <div class="card-body">
                     {{ event.event_notes }}
                 </div>
-    
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
 {% endblock %}
+

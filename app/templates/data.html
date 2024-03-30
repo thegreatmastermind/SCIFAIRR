@@ -3,93 +3,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Page</title>
-    <!-- Chart.js library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Visualizations</title>
 </head>
 <body>
+  <br>
+  <h2>Visualizations</h2>
     <!-- Line Chart: Mood Trajectory -->
-    <canvas id="moodChart" width="600" height="300"></canvas>
+    <div class="data_card">
+        <div class="data-card-header">Mood Trajectory</div>
+        <div class="card-body">
+            <canvas id="moodChart" width="30" height="10"></canvas>
+        </div>
+    </div>
 
-    <!-- Pie Chart: Percentage of Description Options -->
-    <canvas id="tagsChart" width="400" height="200"></canvas>
+    <!-- Pie Chart: Mood Tags -->
+    <div class="data_card">
+        <div class="data-card-header">Mood Tags</div>
+        <div class="data-card-body" id="moodTagsCheckboxes"></div>
+        <div class="data-card-body">
+            <canvas id="moodTagsChart" width="30" height="10"></canvas>
+        </div>
+    </div>
 
     <!-- Bar Chart: Tags Count -->
-    <canvas id="tagsCountChart" width="400" height="200"></canvas>
+    <div class="data_card">
+        <div class="data-card-header">Tags Count</div>
+        <div class="data-card-body">
+            <canvas id="tagsChart" width="20" height="10"></canvas>
+        </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // JavaScript code for creating charts
-        var moodData = JSON.parse('{{ mood_data | tojson | safe | replace("\'", "\\\'") }}');
-        var tagsPercentage = JSON.parse('{{ tags_percentage | tojson | safe | replace("\'", "\\\'") }}');
-        var tagsCount = JSON.parse('{{ tags_count | tojson | safe | replace("\'", "\\\'") }}');
-    
-        // Line Chart: Mood Trajectory
-        var ctxMood = document.getElementById('moodChart').getContext('2d');
-        var moodChart = new Chart(ctxMood, {
-            type: 'line',
-            data: {
-                labels: moodData.map(entry => entry.date),
-                datasets: [{
-                    label: 'Mood Trajectory',
-                    data: moodData.map(entry => entry.mood),
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    fill: false
-                }]
+        // Load data from Flask into JavaScript variables
+      var moodData = {{ mood_data | tojson | safe }};
+      var moodTagsData = {{ mood_tags_data | tojson | safe }};
+      var tagsPercentage = {{ tags_percentage | tojson | safe }};
+      var tagsCount = {{ tags_count | tojson | safe }};
+
+      // Function to create a line chart
+      function createLineChart(ctx, data, options) {
+        return new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.map(entry => entry.date),
+            datasets: [
+              {
+                label: "Mood Scores",
+                data: data.map(entry => entry.mood),
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 2,
+                fill: false,
+              },
+            ],
+          },
+          options: options,
+        });
+      }
+
+       // Function to create a pie chart for Mood Tags with percentages
+    function createMoodTagsPieChart(ctx, data) {
+      var moodTagsMap = {}; // Map to store unique tags count for each date
+
+      data.forEach(entry => {
+          var date = entry.date;
+          var tags = entry.moodTags.split(', ');
+
+          // Count unique tags for each date
+          moodTagsMap[date] = moodTagsMap[date] || {};
+          
+          tags.forEach(tag => {
+              moodTagsMap[date][tag] = (moodTagsMap[date][tag] || 0) + 1;
+          });
+      });
+
+      var moodTagsLabels = [];
+      var moodTagsData = [];
+
+      Object.keys(moodTagsMap).forEach(date => {
+          var tagsCountMap = moodTagsMap[date];
+          var totalTagsCount = Object.values(tagsCountMap).reduce((acc, count) => acc + count, 0);
+
+          Object.keys(tagsCountMap).forEach(tag => {
+              var percentage = (tagsCountMap[tag] / totalTagsCount) * 100;
+              moodTagsLabels.push(tag);
+              moodTagsData.push(percentage);
+          });
+      });
+
+      return new Chart(ctx, {
+          type: "pie",
+          data: {
+              labels: moodTagsLabels,
+              datasets: [
+                  {
+                      data: moodTagsData,
+                      backgroundColor: [
+                          "rgba(255, 99, 132, 0.8)",
+                          "rgba(54, 162, 235, 0.8)",
+                          "rgba(255, 206, 86, 0.8)",
+                          "rgba(75, 192, 192, 0.8)",
+                          "rgba(153, 102, 255, 0.8)",
+                      ],
+                  },
+              ],
+          },
+      });
+  }
+
+      // Function to create a bar chart
+      function createBarChart(ctx, data) {
+        var labels = Object.keys(data);
+        var values = Object.values(data);
+
+        return new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Tags Count",
+                data: values,
+                backgroundColor: "rgba(75, 192, 192, 0.8)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
             },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
+          },
         });
-    
-        // Pie Chart: Percentage of Description Options
-        var ctxTags = document.getElementById('tagsChart').getContext('2d');
-        var tagsChart = new Chart(ctxTags, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(tagsPercentage),
-                datasets: [{
-                    data: Object.values(tagsPercentage),
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(255, 206, 86, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(153, 102, 255, 0.8)',
-                    ],
-                }]
-            }
-        });
-    
-        // Bar Chart: Tags Count
-        var ctxTagsCount = document.getElementById('tagsCountChart').getContext('2d');
-        var tagsCountChart = new Chart(ctxTagsCount, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(tagsCount),
-                datasets: [{
-                    label: 'Tags Count',
-                    data: Object.values(tagsCount),
-                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>        
+      }
+
+      // Create your charts using the functions
+      var ctxMood = document.getElementById("moodChart").getContext("2d");
+      createLineChart(ctxMood, moodData, {
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 10,
+          },
+        },
+      });
+
+      // Create the Mood Tags pie chart
+    var ctxMoodTags = document.getElementById("moodTagsChart").getContext("2d");
+    createMoodTagsPieChart(ctxMoodTags, moodTagsData);
+
+
+      var ctxTags = document.getElementById("tagsChart").getContext("2d");
+      createBarChart(ctxTags, tagsCount);
+    </script>
 </body>
 </html>
 {% endblock %}

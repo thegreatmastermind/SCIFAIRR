@@ -9,6 +9,7 @@ class Entry(db.Model):
     mood = db.Column(db.Integer)
     moodTags = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,6 +23,6 @@ class Event(db.Model):
     event_name = db.Column(db.String(255))
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
-    event_icon = db.Column(db.String(255))
     event_notes = db.Column(db.String(10000))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    event_icon = db.Column(db.String(255))
