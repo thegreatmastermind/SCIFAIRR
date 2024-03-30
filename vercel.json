@@ -6,8 +6,5 @@
   "routes": [
     { "src": "/(.*)", "dest": "/main.py" }
   ],
-  "framework": {
-    "name": "python",
-    "buildCommand": "pip install -r requirements.txt && python main.py"
-  }
+  "framework": null
 }
