@@ -2,79 +2,91 @@
 {% block content %}
 <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>    
 </head>
 <body>
+</div>
 <div class="whole_page">
     <div class="user_header">
         <h1>Welcome, {{ User.first_name }}!</h1>
-    </div>
-
+    </div>  
     <div class="dashboard-content">
+        <div class="streak-box">
+            <img src="../static/css/fire.png"class="fire-icon">
+            <p class="streak-text">Your Current Daily Streak: {{ User.login_streak }}</p>
+        </div>  
         <div class="quick-entry-form">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Quick Entry</h2>
-                </div>
-                <div class="card-body">       
-                    <form method="POST" id="quickEntryForm" action="{{ url_for('views.quick_entry') }}">
+          <div class="card">
+              <div class="card-header">
+                  <h2>Quick Entry</h2>
+              </div>
+              <div class="card-body">       
+                  <form method="POST" id="quickEntryForm" action="{{ url_for('views.quick_entry') }}">
                       <div class="journal-date-form">
-                        <div class="form-item">
-                          <label for="noteDate">Date:</label>
-                          <input type="date" name="noteDate" id="noteDate" value="{{ today_date }}" required>
-                        </div>
-                        <div class="form-item">
-                            <label for="tags">Description:</label>
-                          <select  class="tags-description" name="tags" id="tags">
-                            <option value="None">None</option>
-                            <option value="Life Event">Life Event</option>
-                            <option value="Milestone">Milestone</option>
-                            <option value="Setback">Setback</option>
-                            <option value="Consult">Consult</option>
-                            <option value="Question">Question</option>
-                            <option value="Good">Good</option>
-                            <option value="Neutral">Neutral</option>
-                            <option value="Entry">Entry</option>
-                          </select>
-                          </div>
-                        </div>
-                        <button id="foodTag">Food</button>
-                        <div id="foodForm" style="display: none;">
                           <div class="form-item">
-                              <label for="meal_name">Meal Name:</label>
-                              <input type="text" name="meal_name" id="meal_name" class="form-control">
+                              <label for="noteDate">Date:</label>
+                              <input type="date" name="noteDate" id="noteDate" value="{{ today_date }}" required>
                           </div>
                           <div class="form-item">
-                              <label for="meal_description">Meal Description:</label>
-                              <textarea name="meal_description" id="meal_description" class="form-control" style="height: 150px;"></textarea>
+                              <label for="tags">Description:</label>
+                              <select class="tags-description" name="tags" id="tags">
+                                  <option value="None">None</option>
+                                  <option value="Life Event">Life Event</option>
+                                  <option value="Milestone">Milestone</option>
+                                  <option value="Setback">Setback</option>
+                                  <option value="Consult">Consult</option>
+                                  <option value="Question">Question</option>
+                                  <option value="Good">Good</option>
+                                  <option value="Neutral">Neutral</option>
+                                  <option value="Entry">Entry</option>
+                              </select>
                           </div>
                       </div>
-                        </div>
-                        <div class="notes">
-                          <label for="note">Notes:</label>
-                          <textarea name="note" id="note" class="form-control" style="height: 150px; width: 100%;"></textarea>
-                        </div>
-                        <div class="mood">
+                      <br>
+                      <button type="button" class="myButton" id="foodButton">Add Food</button>
+
+                      <button type="button" class="myButton" id="sleepButton">Add Sleep</button>
+
+                  <div id="foodForm" style="display: none;">
+                    <label for="mealName">Meal Name:</label>
+                    <input type="text" id="mealName" name="mealName" placeholder="ex. Breakfast">
+                    <label for="mealDescription">Meal Description:</label>
+                    <input type="text" id="mealDescription" name="mealDescription" placeholder="ex. Pancakes with maple syrup">
+                    <button type="button" id="addMealButton" class="myButton">Add Meal</button>
+                    <div id="mealContainer"></div>
+                  </div>
+
+                      <div id="sleepForm" style="display: none;">
+                        <label for="sleepStartTime">Start Time:</label>
+                        <input type="time" id="sleepStartTime" name="sleepStartTime">
+                        <label for="sleepEndTime">End Time:</label>
+                        <input type="time" id="sleepEndTime" name="sleepEndTime">
+                        <button type="button" id="addSleepButton" class="myButton">Add Sleep Time</button>
+                        <div id="sleepTimesContainer"></div>
+                      </div>
+                      <div class="mood">
                           <label for="mood">Mood Check-In (1 to 10):</label>
                           <div>
-                            <span class='mood-score' id="moodScore"></span>
-                            <input  type="range" class="mood-range" name="mood" id="mood" min="1" max="10" step="1" oninput="updateMoodTags()">
+                              <span class='mood-score' id="moodScore"></span>
+                              <input type="range" class="mood-range" name="mood" id="mood" min="1" max="10" step="1" oninput="updateMoodTags()">
                           </div> 
                           <div class="mood-tags">     
-                          <label for="moodTags">Tags:</label>
-                          <div id="moodTagsCheckboxes" class="mood-tags-container"></div>
+                              <label for="moodTags">Tags:</label>
+                              <div id="moodTagsCheckboxes" class="mood-tags-container"></div>
                           </div>
                           <br>
-                        </div>
-                      <hr/>
-                      <br>
-                      <div class="button-container">
-                        <button type="submit" class="myButton">Save Quick Entry</button>
                       </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
+                      <hr/>
+                      <div class="button-container">
+                          <button type="submit" class="myButton">Save Quick Entry</button>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      </div>
+      
         <div class="step-checker">
             <div class="card">
                 <div class="card-header">
@@ -96,36 +108,16 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Suggestion Box -->
-        <div class="suggestion-box">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Suggestions</h2>
-                </div>
-                <div class="card-body">
-                    {% if suggestions %}
-                    <ul>
-                        {% for note, note_suggestions in suggestions %}
-                        <li>
-                            <h3>Note: {{ note.date }}</h3>
-                            <p>{{ note.note }}</p>
-                            <ul>
-                                {% for suggestion in note_suggestions %}
-                                <li>{{ suggestion }}</li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p>No suggestions available.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
+        <div class="user-warning-card">
+          <div class="card">
+              <div class="card-header">
+                  <h2>User Warning</h2>
+              </div>
+              <div class="card-body">
+                  <p>All information provided on this website is subjective and may not be helpful to individuals with certain conditions such as ASD (Autism Spectrum Disorder). Please proceed with caution and consult a healthcare professional if needed.</p>
+              </div>
+          </div>
+      </div>
     <script>
         function toggleCompletion(stepId) {
             var stepElement = document.getElementById(stepId);
@@ -139,20 +131,72 @@
                 checkMarkElement.style.backgroundColor = '#482973'; 
             }
         }
-
-        function toggleFoodForm() {
-          var foodForm = document.getElementById('foodForm');
-          if (foodForm.style.display === 'none') {
-              foodForm.style.display = 'block';
-          } else {
-              foodForm.style.display = 'none';
-          }
-      }
+                        
+        // Function to create meal entry
+function createMealEntry() {
+  const mealName = document.getElementById('mealName').value;
+  const mealDescription = document.getElementById('mealDescription').value;
   
-      // Add event listener to the "food" tag
-      document.getElementById('foodTag').addEventListener('click', function() {
-          toggleFoodForm();
-      });
+  // Check if both mealName and mealDescription are not empty
+  if (mealName && mealDescription) {
+    const mealEntry = document.createElement('div');
+    mealEntry.textContent = mealName + ' - ' + mealDescription;
+    document.getElementById('mealContainer').appendChild(mealEntry);
+    
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'X';
+    deleteButton.addEventListener('click', function() {
+      mealEntry.remove();
+    });
+    mealEntry.appendChild(deleteButton);
+  } else {
+    alert('Both meal name and description are required.');
+  }
+}
+// Event listener for "Add Meal" button
+document.getElementById('addMealButton').addEventListener('click', function() {
+  createMealEntry();
+});
+
+// Function to create sleep time entry
+function createSleepTimeEntry() {
+  const sleepStartTime = document.getElementById('sleepStartTime').value;
+  const sleepEndTime = document.getElementById('sleepEndTime').value;
+  
+  // Check if both sleepStartTime and sleepEndTime are not empty
+  if (sleepStartTime && sleepEndTime) {
+    const sleepEntry = document.createElement('div');
+    sleepEntry.textContent = sleepStartTime + ' - ' + sleepEndTime;
+    document.getElementById('sleepTimesContainer').appendChild(sleepEntry);
+    
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'X';
+    deleteButton.addEventListener('click', function() {
+      sleepEntry.remove();
+    });
+    sleepEntry.appendChild(deleteButton);
+  } else {
+    alert('Both sleep start and end times are required.');
+  }
+}
+
+// Event listener for "Add Sleep Time" button
+document.getElementById('addSleepButton').addEventListener('click', function() {
+  createSleepTimeEntry();
+});
+
+// Event listener for "Add Food" button
+document.getElementById('foodButton').addEventListener('click', function() {
+  document.getElementById('foodForm').style.display = 'block';
+  document.getElementById('sleepForm').style.display = 'none';
+});
+
+// Event listener for "Add Sleep" button
+document.getElementById('sleepButton').addEventListener('click', function() {
+  document.getElementById('sleepForm').style.display = 'block';
+  document.getElementById('foodForm').style.display = 'none';
+});
+
     </script>
 </div>
 </body>

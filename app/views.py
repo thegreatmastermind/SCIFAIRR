@@ -1,11 +1,13 @@
 import json
-from flask import Blueprint, redirect, render_template, request, flash, jsonify, url_for, abort
+from flask import Blueprint, redirect, render_template, request, flash, jsonify, url_for
 from flask_login import login_required, current_user
 from .extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from nltk.tokenize import word_tokenize
-from .models import Entry, Event
+from .models import Entry, Event, SavedResource
 from datetime import datetime
+from googleapiclient.discovery import build
+
+
 
 views = Blueprint('views', __name__)
 
@@ -18,17 +20,35 @@ def journal():
         note = request.form.get('note')
         mood = request.form.get('mood')
         mood_tags = request.form.getlist('moodTags')
+        food_name = request.form.get('mealName')
+        food_description = request.form.get('mealDescription')
+        sleep_start_time_str = request.form.get('sleepStartTime')
+        sleep_end_time_str = request.form.get('sleepEndTime')
 
         note_date = datetime.strptime(note_date_str, '%Y-%m-%d').date()
+        current_date = datetime.now()
+        
+        sleep_end_time = current_date.time()
+        sleep_start_time = current_date.time()
+                
+        if sleep_start_time_str:
+            sleep_start_time = datetime.strptime(sleep_start_time_str, '%H:%M').time()
+            
+        if sleep_end_time_str:
+            sleep_end_time = datetime.strptime(sleep_end_time_str, '%H:%M').time()
 
         new_entry = Entry(
-            date=note_date,
-            tags=tags,
-            moodTags=', '.join(mood_tags),
-            note=note,
-            mood=mood,
-            user_id=current_user.id
-        )
+                date=note_date,
+                tags=tags,
+                moodTags=', '.join(mood_tags),
+                note=note,
+                mood=mood,
+                user_id=current_user.id,
+                food_name=food_name,
+                food_description=food_description,
+                sleep_start_time=sleep_start_time,
+                sleep_end_time=sleep_end_time
+            )
 
         db.session.add(new_entry)
         db.session.commit()
@@ -50,6 +70,15 @@ def delete_entry():
 
         return jsonify({})
     
+
+@views.route('/delid/<id>', methods=['GET'])
+def deleteMyID(id):
+    if id:
+        entry = Entry.query.get(id)
+        db.session.delete(entry)
+        db.session.commit()
+        
+        return "hello world!"
 
 @views.route('/schedule', methods=['GET', 'POST'])
 @login_required
@@ -83,18 +112,14 @@ def schedule():
 
 @views.route('/delete-event', methods=['POST'])
 def delete_event():
-        # Attempt to load JSON from the request data
         data = request.get_json()
 
-        # Extract the event ID from the loaded JSON
         event_id = data.get('eventId')
 
         if event_id is not None:
-            # Query the Event with the provided ID
             event = Event.query.get(event_id)
 
             if event and event.user_id == current_user.id:
-                # If the event exists and belongs to the current user, delete it
                 db.session.delete(event)
                 db.session.commit()
 
@@ -165,10 +190,10 @@ def add_event():
     return redirect(url_for('views.schedule'))
 
 @views.route('/quick-entry', methods=['POST'])
+@login_required
 def quick_entry():
     if request.method == 'POST':
         note_date_str = request.form.get('noteDate')
-        quick_note = request.form.get('note')
 
         note_date = datetime.strptime(note_date_str, '%Y-%m-%d').date()
 
@@ -176,9 +201,12 @@ def quick_entry():
             date=note_date,
             tags=request.form.get('tags'),
             moodTags=', '.join(request.form.getlist('moodTags')),
-            note=quick_note,
             mood=request.form.get('mood'),
-            user_id=current_user.id
+            user_id=current_user.id,
+            food_name=request.form.get('mealName'),
+            food_description=request.form.get('mealDescription'),
+            sleep_start_time=datetime.strptime(request.form.get('sleepStartTime'), '%H:%M').time(),
+            sleep_end_time=datetime.strptime(request.form.get('sleepEndTime'), '%H:%M').time()
         )
 
         db.session.add(new_entry)
@@ -190,10 +218,45 @@ def quick_entry():
 
     return redirect(url_for('views.dashboard'))
 
-@views.route('/more')
-def more():
-    return render_template("more.html")
+# Function to initialize the YouTube Data API client
+def youtube_api_service():
+    api_key = 'AIzaSyCdM20n2aS-eleCp2NQkgK_6CrCj-P8tfY'  
+    youtube = build('youtube', 'v3', developerKey=api_key)
+    return youtube
 
+@views.route('/more', methods=['GET'])
+def more():
+    return render_template('more.html')
+
+@views.route('/get-saved-videos', methods=['GET'])
+def get_saved_videos():
+    saved_videos = SavedResource.query.all()
+    videos = [{'id': video.id, 'title': video.title, 'linkOrThumbnailUrl': video.link_or_thumbnail_url} for video in saved_videos]
+    return jsonify({'videos': videos})
+
+
+@views.route('/youtube-videos', methods=['GET'])
+def youtube_videos():
+    youtube = youtube_api_service()
+    search_query = 'autism'  
+    try:
+        search_response = youtube.search().list(q=search_query, part='id,snippet', maxResults=10).execute()
+        videos = search_response.get('items', [])
+        return jsonify({'videos': videos})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@views.route('/soundscapes-videos', methods=['GET'])
+def soundscapes():
+    youtube = youtube_api_service()
+    search_query = 'soundscapes'  
+    try:
+        search_response = youtube.search().list(q=search_query, part='id,snippet', maxResults=10).execute()
+        videos = search_response.get('items', [])
+        return jsonify({'videos': videos})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 @views.route('/')
 def landing():
     return render_template("landing.html")
@@ -201,7 +264,7 @@ def landing():
 @views.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template("dashboard.html", user=current_user)
+    return render_template("dashboard.html", User=current_user)
 
 
 @views.route('/profile', methods=['GET', 'POST'])
@@ -217,7 +280,7 @@ def profile():
         elif 'delete_account' in request.form:
             delete_account()
 
-    return render_template('profile.html', user=current_user)
+    return render_template('profile.html', User=current_user)
 
 def change_password():
         old_password = request.form.get('old_password')

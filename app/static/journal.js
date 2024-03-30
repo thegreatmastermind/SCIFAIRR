@@ -57,21 +57,25 @@ function updateMoodTags() {
 // Call the function on page load
 document.addEventListener('DOMContentLoaded', updateMoodTags);
 
-// deletes entries
 function deleteEntry(entryId) {
-  console.log(`Deleting entry with ID: ${entryId}`);
-  fetch("/delete-entry", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ entryId: entryId }),
+  fetch('/delete-entry', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token() }}'  // Include CSRF token for security
+      },
+      body: JSON.stringify({ entryId: entryId })
   })
-  .then((_res) => {
-    console.log("Entry deleted successfully");
-    window.location.href = "/journal";
+  .then(response => {
+      if (response.ok) {
+          window.location.reload();
+      } else {
+          console.error('Failed to delete entry');
+      }
   })
-  .catch(error => console.error('Error deleting entry:', error));
+  .catch(error => {
+      console.error('Error deleting entry:', error);
+  });
 }
 
 function deleteEvent(eventId) {
@@ -120,5 +124,86 @@ window.onclick = function(event) {
       }
   }
 };
+// Function to create meal entry
+function createMealEntry() {
+  const mealName = document.getElementById('mealName').value;
+  const mealDescription = document.getElementById('mealDescription').value;
+  
+  // Check if both mealName and mealDescription are not empty
+  if (mealName && mealDescription) {
+    const mealEntry = document.createElement('div');
+    mealEntry.textContent = mealName + ' - ' + mealDescription;
+    document.getElementById('mealContainer').appendChild(mealEntry);
+    
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'X';
+    deleteButton.addEventListener('click', function() {
+      mealEntry.remove();
+    });
+    mealEntry.appendChild(deleteButton);
+  } else {
+    alert('Both meal name and description are required.');
+  }
+}
+// Event listener for "Add Meal" button
+document.getElementById('addMealButton').addEventListener('click', function() {
+  createMealEntry();
+});
+
+// Function to create sleep time entry
+function createSleepTimeEntry() {
+  const sleepStartTime = document.getElementById('sleepStartTime').value;
+  const sleepEndTime = document.getElementById('sleepEndTime').value;
+  
+  // Check if both sleepStartTime and sleepEndTime are not empty
+  if (sleepStartTime && sleepEndTime) {
+    const sleepEntry = document.createElement('div');
+    sleepEntry.textContent = sleepStartTime + ' - ' + sleepEndTime;
+    document.getElementById('sleepTimesContainer').appendChild(sleepEntry);
+    
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'X';
+    deleteButton.addEventListener('click', function() {
+      sleepEntry.remove();
+    });
+    sleepEntry.appendChild(deleteButton);
+  } else {
+    alert('Both sleep start and end times are required.');
+  }
+}
+
+// Event listener for "Add Sleep Time" button
+document.getElementById('addSleepButton').addEventListener('click', function() {
+  createSleepTimeEntry();
+});
+
+// Event listener for "Add Food" button
+document.getElementById('foodButton').addEventListener('click', function() {
+  document.getElementById('foodForm').style.display = 'block';
+  document.getElementById('sleepForm').style.display = 'none';
+});
+
+// Event listener for "Add Sleep" button
+document.getElementById('sleepButton').addEventListener('click', function() {
+  document.getElementById('sleepForm').style.display = 'block';
+  document.getElementById('foodForm').style.display = 'none';
+});
+
+function toggleDetails(event) {
+  // Find the entry-details-container related to the clicked arrow button
+  var entryDetailsContainer = event.target.parentElement.nextElementSibling;
+  
+  // Toggle the display of the entry-details-container
+  if (entryDetailsContainer.style.display === "none") {
+      entryDetailsContainer.style.display = "block";
+      event.target.textContent = "▼"; // Change the arrow to point down
+  } else {
+      entryDetailsContainer.style.display = "none";
+      event.target.textContent = "◄"; // Change the arrow to point left
+  }
+}
+
+
+
 
 

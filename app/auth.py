@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 from .models import User
 from .extensions import db
+from datetime import datetime, timedelta
 
 auth = Blueprint('auth', __name__)
 
@@ -15,6 +16,14 @@ def login():
         if user:
             if check_password_hash(user.password, password):
                 flash('Logged in successfully!', category='success')
+                if user.login_streak is None:
+                    user.login_streak = 0  
+                if user.last_login_date and user.last_login_date == datetime.now().date() - timedelta(days=1):
+                    user.login_streak += 1  
+                else:
+                    user.login_streak = 1  
+                user.last_login_date = datetime.now().date() 
+                db.session.commit()  
                 login_user(user, remember=True)
                 return redirect(url_for('views.dashboard'))  
             else:
@@ -46,6 +55,7 @@ def sign_up():
         else:
             hashed_password = generate_password_hash(password1, method='pbkdf2:sha256')
             new_user = User(email=email, first_name=first_name, password=hashed_password)
+            new_user.login_streak = 0
             db.session.add(new_user)
             db.session.commit() 
             login_user(new_user, remember=True)  

@@ -19,8 +19,42 @@ body {
 
 .step-checker {
     position: absolute;
-    left: 700px;
+    left: calc(50% + 70px); 
     width: 50%;
+    top: 120px; 
+}
+
+.streak-box {
+    border: 5px solid #4B0082; 
+    background-color: #E6E6FA; 
+    padding: 20px;
+    border-radius: 10px;
+    position: absolute;
+    top: 120px; 
+    left: 80px;
+    width: calc(100% - 150px); 
+    height: 80px;
+    box-sizing: border-box; 
+    font-size: 24px;
+    font-weight: bolder;
+    color: #4B0082
+}
+
+.streak-text {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%);
+    left: 80px; /* Position towards the left */
+}
+
+
+.fire-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
 }
 
 .step {
@@ -55,7 +89,16 @@ body {
     font-size: medium;
 }
 
-
 .quick-entry-form {
-    width: 50%;
+    position: absolute;
+    width: calc(110% - 170px); /* Adjust width to make it wider */
+    top: 120px;
+    left: 60px;
+}
+.user-warning-card {
+    position: absolute;
+    top: 390px; 
+    left: 730px; 
+    width: calc(50% - 100px); 
+    margin: 0;
 }

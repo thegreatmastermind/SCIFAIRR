@@ -1,5 +1,9 @@
 {% extends "base.html" %}
+
 {% block content %}
+<head>
+  <title>Journal</title>
+</head>
 <div class="journal-container">
   <div class="journal-entry-form">
     <div class="card">
@@ -10,41 +14,64 @@
         <form method="POST" id="entryForm">
           <div class="journal-date-form">
             <div class="form-item">
-            <label for="noteDate">Date:</label>
-            <input type="date" name="noteDate" id="noteDate" required>
+              <label for="noteDate">Date:</label>
+              <input type="date" name="noteDate" id="noteDate" required>
             </div>
             <div class="form-item">
-            <label for="tags">Description:</label>
-          <select  class="tags-description" name="tags" id="tags">
-            <option value="None">None</option>
-            <option value="Life Event">Life Event</option>
-            <option value="Milestone">Milestone</option>
-            <option value="Setback">Setback</option>
-            <option value="Consult">Consult</option>
-            <option value="Question">Question</option>
-            <option value="Good">Good</option>
-            <option value="Neutral">Neutral</option>
-            <option value="Entry">Entry</option>
-          </select>
-          </div>
-        </div>
-        <div class="notes">
-          <label for="note">Notes:</label>
-          <textarea name="note" id="note" class="form-control" style="height: 150px; width: 100%;"></textarea>
-        </div>
-        <div class="mood">
-          <label for="mood">Mood Check-In (1 to 10):</label>
-          <div>
-            <span class='mood-score' id="moodScore"></span>
-            <input  type="range" class="mood-range" name="mood" id="mood" min="1" max="10" step="1" oninput="updateMoodTags()">
-          </div> 
-          <div class="mood-tags">     
-          <label for="moodTags">Tags:</label>
-          <div id="moodTagsCheckboxes" class="mood-tags-container"></div>
+              <label for="tags">Description:</label>
+              <select class="tags-description" name="tags" id="tags">
+                <option value="None">None</option>
+                <option value="Life Event">Life Event</option>
+                <option value="Milestone">Milestone</option>
+                <option value="Setback">Setback</option>
+                <option value="Consult">Consult</option>
+                <option value="Question">Question</option>
+                <option value="Good">Good</option>
+                <option value="Neutral">Neutral</option>
+                <option value="Entry">Entry</option>
+              </select>
+            </div>
           </div>
           <br>
-        </div>
-        <hr/>
+          
+    <button type="button" class="myButton" id="foodButton">Add Food</button>
+
+    <button type="button" class="myButton" id="sleepButton">Add Sleep</button>
+
+<div id="foodForm" style="display: none;">
+  <label for="mealName">Meal Name:</label>
+  <input type="text" id="mealName" name="mealName" placeholder="ex. Breakfast">
+  <label for="mealDescription">Meal Description:</label>
+  <input type="text" id="mealDescription" name="mealDescription" placeholder="ex. Pancakes with maple syrup">
+  <button type="button" id="addMealButton" class="myButton">Add Meal</button>
+  <div id="mealContainer"></div>
+</div>
+
+    <div id="sleepForm" style="display: none;">
+      <label for="sleepStartTime">Start Time:</label>
+      <input type="time" id="sleepStartTime" name="sleepStartTime">
+      <label for="sleepEndTime">End Time:</label>
+      <input type="time" id="sleepEndTime" name="sleepEndTime">
+      <button type="button" id="addSleepButton" class="myButton">Add Sleep Time</button>
+      <div id="sleepTimesContainer"></div>
+    </div>
+          <div class="notes">
+            <label for="note">Notes:</label>
+            <textarea name="note" id="note" class="form-control" style="height: 150px; width: 100%;"></textarea>
+          </div>
+          <div class="mood">
+            <label for="mood">Mood Check-In (1 to 10):</label>
+            <div>
+              <span class='mood-score' id="moodScore"></span>
+              <input type="range" class="mood-range" name="mood" id="mood" min="1" max="10" step="1" oninput="updateMoodTags()">
+            </div> 
+            <div class="mood-tags">     
+              <label for="moodTags">Tags:</label>
+              <div id="moodTagsCheckboxes" class="mood-tags-container"></div>
+            </div>
+            <br>
+          </div>
+          <hr/>
           <div class="button-container">
             <button type="submit" class="myButton">Save Entry</button>
           </div>
@@ -53,27 +80,59 @@
     </div>
   </div>
 
-  <div class="journal-existing-entries">
-    <h2 class="existing-entries-header">All Entries</h2>
-    <div class="entries-container">
-      {% for entry in entries %}    
-        <div class="card my-card">
-          <div class="card-header card-header-item">
-            <div class="description-date-container">
-              {{entry.tags}} - {{entry.date}}
-            </div>
-            <button type="button" class="close" onClick="deleteEntry('{{ entry.id }}')" title="Delete this entry">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="card-body">
-            {{entry.note}}
-          </div>
-          <div class="card-footer">
-            {{entry.moodTags}}
-          </div>
-        </div>    
-      {% endfor %}
-    </div>  
-</div>
-{% endblock %}
+  <h2 class="existing-entries-header">All Entries</h2>
+  <div class="entries-container">
+      <ul class="entry-list">
+          {% set grouped_entries = {} %}
+          {% for entry in entries %}
+              {% set group_key = entry.date.strftime('%A, %B %d, %Y') %}
+              {% if group_key not in grouped_entries %}
+                  {% set _ = grouped_entries.update({group_key: []}) %}
+              {% endif %}
+              {% set _ = grouped_entries[group_key].append(entry) %}
+          {% endfor %}
+          
+          {% for group_key, group_entries in grouped_entries.items() %}
+              <li>
+                  <div class="entry-details">
+                      <span class="entry-date">{{ group_key }}</span>
+                      <button class="arrow" onclick="toggleDetails(event)">◄</button>
+                  </div>
+                  <div class="entry-details-container" style="display: none;">
+                      <ul class="grouped-entry-list">
+                          {% for entry in group_entries %}
+                              <li>
+                                  <div class="card my-card">
+                                      <div class="card-header card-header-item">
+                                          <div class="description-date-container">
+                                              {{ entry.tags }}
+                                          </div>
+                                          <button type="button" class="close" onclick="deleteEntry('{{ entry.id }}')" title="Delete this entry">
+                                              <span aria-hidden="true">&times;</span>
+                                          </button>
+                                      </div>
+                                      <div class="card-body">
+                                          <p><strong>Notes:</strong> {{ entry.note }}</p>
+                                          {% if entry.food_name %}
+                                              <p><strong>Food:</strong> {{ entry.food_name }}</p>
+                                              <p><strong>Food Description:</strong> {{ entry.food_description }}</p>
+                                          {% endif %}
+                                          {% if entry.sleep_start_time and entry.sleep_end_time %}
+                                              <p><strong>Sleep Start Time:</strong> {{ entry.sleep_start_time.strftime('%I:%M %p') }}</p>
+                                              <p><strong>Sleep End Time:</strong> {{ entry.sleep_end_time.strftime('%I:%M %p') }}</p>
+                                          {% endif %}
+                                      </div>
+                                      <div class="card-footer">
+                                          {{ entry.moodTags }}
+                                      </div>
+                                  </div>
+                              </li>
+                          {% endfor %}
+                      </ul>
+                  </div>
+              </li>
+          {% endfor %}
+      </ul>
+  </div>  
+  
+{% endblock %}  

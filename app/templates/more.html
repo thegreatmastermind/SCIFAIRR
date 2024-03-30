@@ -1,14 +1,130 @@
 {% extends "base.html" %}
 {% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>More</title>
+    <style>
+        .video-container {
+            overflow: hidden;
+        }
+
+        .videos-row { 
+            white-space: nowrap;
+            transition: transform 0.3s ease;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding: 20px 0;
+        }
+
+        .video-card {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-right: 20px;
+            background-color: white;
+            display: inline-block;
+            width: 300px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .video-card img {
+            width: 100%;
+            height: auto;
+        }
+
+        .video-title {
+            padding: 10px;
+            background-color: white;
+            color: black;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-    
+    <h1>Resources</h1>
+    <h2>Videos on Autism</h2>
+    <div class="video-container">
+        <div class="videos-row" id="videos-row">
+            <!-- Autism videos will be dynamically added here -->
+        </div>
+    </div>
+    <h2>Soundscapes</h2>
+    <div class="video-container">
+        <div class="videos-row" id="soundscapes-videos-row">
+            <!-- Soundscapes videos will be dynamically added here -->
+        </div>
+    </div>
 </body>
+<script>
+    function createVideoCard(video) {
+        const videoCard = document.createElement('div');
+        videoCard.className = 'video-card';
+
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${video.id.videoId}`;
+        iframe.width = '100%';
+        iframe.height = '200px';
+        iframe.allowFullscreen = true;
+        iframe.title = video.snippet && video.snippet.title ? video.snippet.title : '';
+
+        const title = document.createElement('div');
+        title.className = 'video-title';
+        title.textContent = video.snippet && video.snippet.title ? video.snippet.title : '';
+
+        videoCard.appendChild(iframe);
+        videoCard.appendChild(title);
+
+        return videoCard;
+    }
+
+    function displayFetchedVideos() {
+        const videosRow = document.getElementById('videos-row');
+        fetch('/youtube-videos')
+        .then(response => response.json())
+        .then(data => {
+            if (data.videos && Array.isArray(data.videos)) {
+                data.videos.forEach(video => {
+                    const videoCard = createVideoCard(video);
+                    videosRow.appendChild(videoCard);
+                });
+            } else {
+                console.error('Invalid data format:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching videos:', error);
+        });
+    }
+
+    function displaySoundscapesVideos() {
+        const soundscapesVideosRow = document.getElementById('soundscapes-videos-row');
+        fetch('/soundscapes-videos')  // Adjusted route to match Flask endpoint
+        .then(response => response.json())
+        .then(data => {
+            if (data.videos && Array.isArray(data.videos)) {
+                data.videos.forEach(video => {
+                    const videoCard = createVideoCard(video);
+                    soundscapesVideosRow.appendChild(videoCard);
+                });
+            } else {
+                console.error('Invalid data format:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching soundscapes videos:', error);
+        });
+    }
+
+    displaySoundscapesVideos();    
+    displayFetchedVideos();
+</script>
+
 </html>
 {% endblock %}
+
